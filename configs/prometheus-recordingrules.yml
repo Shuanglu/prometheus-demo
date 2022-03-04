@@ -1,0 +1,5 @@
+groups:
+  - name: test
+    rules:
+    - record: job:apiserver_request_duration_seconds_bucket:sum
+      expr: sum by (job) (apiserver_request_duration_seconds_bucket)

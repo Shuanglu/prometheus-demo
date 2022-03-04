@@ -1,0 +1,34 @@
+groups:
+  - alert: PrometheusJobMissing
+    expr: absent(up{app="prometheus",job="kubernetes-pods"})
+    for: 0m
+    labels:
+      severity: warning
+    annotations:
+      summary: Prometheus job missing (instance {{ $labels.instance }})
+      description: "A Prometheus job has disappeared\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+  - alert: PrometheusTargetMissing
+    expr: up == 0
+    for: 0m
+    labels:
+      severity: critical
+    annotations:
+      summary: Prometheus target missing (instance {{ $labels.instance }})
+      description: "A Prometheus target has disappeared. An exporter might be crashed.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+  - alert: PrometheusAllTargetsMissing
+    expr: count by (job) (up) == 0
+    for: 0m
+    labels:
+      severity: critical
+    annotations:
+      summary: Prometheus all targets missing (instance {{ $labels.instance }})
+      description: "A Prometheus job does not have living target anymore.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+  - alert: KubernetesNodeReady
+    expr: kube_node_status_condition{condition="Ready",status="true",pod_template_hash=""} == 0
+    for: 10m
+    labels:
+      severity: critical
+    annotations:
+      summary: Kubernetes Node ready (instance {{ $labels.instance }})
+      description: "Node {{ $labels.node }} has been unready for a long time\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+

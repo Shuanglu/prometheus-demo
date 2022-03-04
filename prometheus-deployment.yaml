@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  labels:
+    app: prometheus
+    service: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+      service: monitoring
+  template:
+    metadata:
+      labels:
+        app: prometheus
+        service: monitoring
+    spec:
+      volumes:
+      - name: config
+        configMap:
+          name: prometheus
+      serviceAccount: prometheus
+      containers:
+      - name: prometheus
+        image: prom/prometheus:v2.31.0-rc.1
+        args: [ '--config.file=/etc/prometheus/prometheus-config.yml', '--web.enable-lifecycle' ] 
+        ports:
+        - containerPort: 9090
+        volumeMounts:
+        - name: config
+          mountPath: /etc/prometheus/
