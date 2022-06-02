@@ -432,6 +432,28 @@ data:
             regex: __meta_kubernetes_pod_annotation_prometheus_io_param_(.+)
             replacement: __param_$1
 
+      - job_name: "kuma-pods"
+
+        kubernetes_sd_configs:
+          - role: pod
+
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_namespace]
+            action: replace
+            target_label: kubernetes_namespace
+            regex: (kuma-demo1)
+          - source_labels: [__meta_kubernetes_pod_name]
+            action: replace
+            target_label: kubernetes_pod_name
+          - source_labels: [__meta_kubernetes_pod_annotation_shuanglu_io_metric_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__address__, __meta_kubernetes_pod_annotation_shuanglu_io_scrape_port]
+            action: replace
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:$3
+            target_label: __address__
 
       - job_name: 'blackbox'
         metrics_path: /probe
