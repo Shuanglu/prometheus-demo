@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alertmanager
+  labels:
+    app: alertmanager
+    service: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alertmanager
+      service: monitoring
+  template:
+    metadata:
+      labels:
+        app: alertmanager
+        service: monitoring
+    spec:
+      volumes:
+      - name: config
+        configMap:
+          name: alertmanager
+      serviceAccount: alertmanager
+      containers:
+      - name: alertmanager
+        image: prom/alertmanager:v0.23.0
+        args: [ '--config.file=/etc/alertmanager/alertmanager-config.yml' ] 
+        ports:
+        - containerPort: 9093
+        - containerPort: 9094
+        volumeMounts:
+        - name: config
+          mountPath: /etc/alertmanager/
