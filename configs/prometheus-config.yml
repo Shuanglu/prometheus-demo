@@ -413,4 +413,63 @@ scrape_configs:
         action: drop
         regex: coredns-auto.*
 
-
+  - job_name: 'kuma-dataplanes'
+    scrape_interval: "5s"
+    relabel_configs:
+      - source_labels:
+        - __meta_kuma_mesh
+        regex: "(.*)"
+        target_label: mesh
+      - source_labels:
+        - __meta_kuma_dataplane
+        regex: "(.*)"
+        target_label: dataplane
+      - source_labels:
+        - __meta_kuma_service
+        regex: "(.*)"
+        target_label: service
+      - action: labelmap
+        regex: __meta_kuma_label_(.+)
+    kuma_sd_configs:
+    - server: "http://kuma-control-plane.kuma-system.svc:5676"
+    
+  - job_name: 'nginx-mesh-sidecars'
+    kubernetes_sd_configs:
+      - role: pod
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_container_name]
+        action: keep
+        regex: nginx-mesh-sidecar
+      - action: labelmap
+        regex: __meta_kubernetes_pod_label_nsm_nginx_com_(.+)
+      - action: labeldrop
+        regex: __meta_kubernetes_pod_label_nsm_nginx_com_(.+)
+      - action: labelmap
+        regex: __meta_kubernetes_pod_label_(.+)
+      - source_labels: [__meta_kubernetes_namespace]
+        action: replace
+        target_label: namespace
+      - source_labels: [__meta_kubernetes_pod_name]
+        action: replace
+        target_label: pod
+  - job_name: 'appmesh-envoy'
+    metrics_path: /stats/prometheus
+    kubernetes_sd_configs:
+      - role: pod
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_container_name]
+        action: keep
+        regex: '^envoy$'
+      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+        action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: ${1}:9901
+        target_label: __address__
+      - action: labelmap
+        regex: __meta_kubernetes_pod_label_(.+)
+      - source_labels: [__meta_kubernetes_namespace]
+        action: replace
+        target_label: kubernetes_namespace
+      - source_labels: [__meta_kubernetes_pod_name]
+        action: replace
+        target_label: kubernetes_pod_name
