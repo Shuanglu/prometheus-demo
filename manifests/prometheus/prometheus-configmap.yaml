@@ -439,9 +439,9 @@ data:
 
         relabel_configs:
           - source_labels: [__meta_kubernetes_namespace]
+            regex: kuma-demo1
             action: replace
             target_label: kubernetes_namespace
-            regex: (kuma-demo1)
           - source_labels: [__meta_kubernetes_pod_name]
             action: replace
             target_label: kubernetes_pod_name
