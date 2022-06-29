@@ -9,11 +9,15 @@ rules:
 - apiGroups:
   - ""
   resources:
+  - nodes
   - nodes/metrics
   verbs:
   - get
+  - list
+  - watch
 - nonResourceURLs:
   - /metrics
+  - /metrics/cadvisor
   verbs:
   - get
 - apiGroups:
@@ -27,7 +31,7 @@ rules:
   - list
   - watch
 - apiGroups:
-  - extensions
+  - networking.k8s.io
   resources:
   - ingresses
   verbs:

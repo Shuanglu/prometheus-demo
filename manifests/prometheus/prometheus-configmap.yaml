@@ -486,5 +486,43 @@ data:
           - source_labels: [__meta_kubernetes_pod_name]
             action: drop
             regex: coredns-auto.*
-
-
+      
+      - job_name: kubernetes-cadvisor
+        honor_timestamps: true
+        scrape_interval: 15s
+        scrape_timeout: 10s
+        metrics_path: /metrics/cadvisor
+        scheme: https
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          insecure_skip_verify: true
+        kubernetes_sd_configs:
+        - role: node
+        relabel_configs:
+        - separator: ;
+          regex: __meta_kubernetes_node_label_(.+)
+          replacement: $1
+          action: labelmap
+        - source_labels: [__address__]
+          separator: ;
+          regex: ([^:]+)(?::\d+)?
+          target_label: __address__
+          replacement: $1:10250
+          action: replace
+        - separator: ;
+          regex: (.*)
+          target_label: __metrics_path__
+          replacement: /metrics/cadvisor
+          action: replace
+        metric_relabel_configs:
+        - source_labels: [namespace]
+          separator: ;
+          regex: ^$
+          replacement: $1
+          action: drop
+        - source_labels: [pod_name]
+          separator: ;
+          regex: ^$
+          replacement: $1
+          action: drop
