@@ -500,10 +500,6 @@ data:
         kubernetes_sd_configs:
         - role: node
         relabel_configs:
-        - separator: ;
-          regex: __meta_kubernetes_node_label_(.+)
-          replacement: $1
-          action: labelmap
         - source_labels: [__address__]
           separator: ;
           regex: ([^:]+)(?::\d+)?
@@ -515,14 +511,3 @@ data:
           target_label: __metrics_path__
           replacement: /metrics/cadvisor
           action: replace
-        metric_relabel_configs:
-        - source_labels: [namespace]
-          separator: ;
-          regex: ^$
-          replacement: $1
-          action: drop
-        - source_labels: [pod_name]
-          separator: ;
-          regex: ^$
-          replacement: $1
-          action: drop
